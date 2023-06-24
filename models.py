@@ -25,6 +25,7 @@ class Follows(db.Model):
     user_following_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete='CASCADE'),
+        primary_key=True
     )
 
 class Likes(db.Model):
@@ -65,15 +66,16 @@ class User(db.Model):
     followers = db.relationship(
         'User', 
         secondary='follows', 
-        primaryjoin=(Follows.user_following_id == id),
-        secondaryjoin=(Follows.user_being_followed_id == id)
+        primaryjoin=(Follows.user_being_followed_id == id),
+        secondaryjoin=(Follows.user_following_id == id),
+        cascade='all,delete'
     )
 
     following = db.relationship(
         'User', 
         secondary='follows',
         primaryjoin=(Follows.user_following_id == id),
-        secondaryjoin=(Follows.user_being_followed_id == id)
+        secondaryjoin=(Follows.user_being_followed_id == id),
     )
 
     likes = db.relationship('Message', secondary='likes')
@@ -124,10 +126,10 @@ class Message(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    text = db.Column(db.String(50), nullable=False)
+    text = db.Column(db.String(140), nullable=False)
 
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
 
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
 
     user = db.relationship('User')
